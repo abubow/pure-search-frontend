@@ -31,17 +31,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
       className={`w-full ${compact ? 'max-w-4xl' : 'max-w-2xl'}`}
       initial={{ scale: 0.95 }}
       animate={{ scale: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2, type: "spring", stiffness: 500, damping: 25 }}
     >
       <motion.div 
-        className={`relative w-full glass transition-all duration-300 ${
+        className={`relative w-full glass transition-all ${
           isFocused 
             ? 'ring-2 ring-sky-500/70 shadow-lg' 
             : 'ring-1 ring-sky-200/50 shadow-md'
         } rounded-full overflow-hidden`}
         whileHover={{ scale: 1.01 }}
         animate={isFocused ? { scale: 1.01 } : { scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+        transition={{ type: "spring", stiffness: 500, damping: 20, duration: 0.15 }}
       >
         <motion.div 
           className="absolute inset-0 search-bar-gradient opacity-60"
@@ -49,7 +49,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             { opacity: 0.8 } : 
             { opacity: 0.6 }
           }
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.15 }}
         ></motion.div>
         <input
           type="text"
@@ -70,7 +70,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           aria-label="Search"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          transition={{ type: "spring", stiffness: 600, damping: 15, duration: 0.1 }}
         >
           <Search className={compact ? 'w-4 h-4' : 'w-5 h-5'} />
         </motion.button>

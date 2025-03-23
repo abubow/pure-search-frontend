@@ -1,12 +1,21 @@
 import { Metadata } from 'next';
 import { SearchPage } from '../../../components/SearchPage';
 
-type Props = {
-  params: { query: string[] };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+interface SearchParams {
+  [key: string]: string | string[] | undefined;
+}
 
-export function generateMetadata({ params, searchParams }: Props): Metadata {
+interface PageParams {
+  query: string[];
+}
+
+export function generateMetadata({ 
+  params, 
+  searchParams 
+}: { 
+  params: PageParams;
+  searchParams: SearchParams;
+}): Metadata {
   const query = params.query.join('/') || searchParams.q as string || '';
   
   return {
@@ -26,12 +35,18 @@ export function generateMetadata({ params, searchParams }: Props): Metadata {
       ],
     },
     twitter: {
-      images: [`/api/og?search=true&q=${encodeURIComponent(query)}&title=${encodeURIComponent('Search Results')}&description=${encodeURIComponent(`Results for "${query}"`)}`,]
+      images: [`/api/og?search=true&q=${encodeURIComponent(query)}&title=${encodeURIComponent('Search Results')}&description=${encodeURIComponent(`Results for "${query}"`)}`]
     },
   };
 }
 
-export default function QuerySearchPage({ params, searchParams }: Props) {
+export default function QuerySearchPage({ 
+  params,
+  searchParams
+}: {
+  params: PageParams;
+  searchParams: SearchParams;
+}) {
   const query = params.query.join('/') || searchParams.q as string || '';
   return <SearchPage initialQuery={query} />;
 } 

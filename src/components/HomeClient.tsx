@@ -45,7 +45,7 @@ export default function HomeClient() {
             className="flex items-center gap-3 mb-6"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3, type: "spring", stiffness: 400, damping: 20 }}
           >
             <div className="relative">
               <motion.div 
@@ -64,6 +64,7 @@ export default function HomeClient() {
                 className="relative p-2 rounded-full shadow-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.15, type: "spring", stiffness: 500 }}
               >
                 <Search className="h-8 w-8 gradient-text" />
               </motion.div>
@@ -88,13 +89,13 @@ export default function HomeClient() {
             className="text-slate-700 mb-8 text-center max-w-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
           >
             Find authentic, non-AI generated content across the web
             <motion.span 
               className="inline-flex items-center ml-2"
               animate={{ rotate: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: 1.5, repeat: Infinity }}
             >
               <Sparkles className="h-4 w-4 text-amber-500" />
             </motion.span>
@@ -104,7 +105,7 @@ export default function HomeClient() {
             className="w-full relative flex justify-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.3, delay: 0.2, type: "spring", stiffness: 400 }}
           >
             <motion.div 
               className="absolute -inset-0.5 rounded-full search-bar-gradient blur-md"
@@ -125,7 +126,7 @@ export default function HomeClient() {
             className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
           >
             <FeatureCard 
               title="Human Content" 
@@ -137,13 +138,13 @@ export default function HomeClient() {
               title="Fast Search" 
               description="Get quick results from across the web"
               icon={<Search className="h-5 w-5 text-sky-500" />}
-              delay={0.1}
+              delay={0.05}
             />
             <FeatureCard 
               title="Reliable" 
               description="Content verification you can trust"
               icon={<Shield className="h-5 w-5 text-emerald-500" />}
-              delay={0.2}
+              delay={0.1}
             />
           </motion.div>
         </div>
@@ -153,7 +154,7 @@ export default function HomeClient() {
         className="mt-auto w-full py-4 text-center glass border-t border-sky-100"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.8 }}
+        transition={{ duration: 0.3, delay: 0.4 }}
       >
         <p className="text-slate-700 text-sm">© 2024 PureSearch - Find authentic content</p>
         <p className="mt-1 text-slate-500 text-sm">Helping you discover non-AI generated content</p>
@@ -175,23 +176,24 @@ function FeatureCard({ title, description, icon, delay = 0 }: FeatureCardProps) 
       className="glass-card p-4 transition-all relative overflow-hidden group"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.6 + delay }}
+      transition={{ duration: 0.3, delay: 0.3 + delay, type: "spring", stiffness: 400, damping: 20 }}
       whileHover={{ 
         y: -5, 
         boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
       }}
+      whileTap={{ y: 0 }}
     >
       <motion.div 
         className="absolute inset-0 bg-gradient-to-r from-sky-50/10 to-cyan-50/10 z-0"
         initial={{ opacity: 0 }}
         whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.15 }}
       ></motion.div>
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-2">
           <motion.div
             whileHover={{ rotate: 10 }}
-            transition={{ type: "spring", stiffness: 400 }}
+            transition={{ type: "spring", stiffness: 500, damping: 15 }}
           >
             {icon}
           </motion.div>

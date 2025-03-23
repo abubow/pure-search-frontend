@@ -68,7 +68,7 @@ const listVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.05 // Reduced from 0.1 for faster staggering
     }
   }
 };
@@ -131,12 +131,13 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
         className="glass sticky top-0 z-10 border-b border-sky-100"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20, duration: 0.2 }}
       >
         <div className="container mx-auto px-4 py-3 flex items-center">
           <motion.div 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.15, type: "spring", stiffness: 500 }}
           >
             <Link 
               href="/" 
@@ -146,7 +147,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
               <motion.div 
                 className="gradient-primary p-1 rounded-lg mr-1 shadow-md"
                 whileHover={{ rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
+                transition={{ type: "spring", stiffness: 500, damping: 10 }}
               >
                 <Search className="h-5 w-5 text-white" />
               </motion.div>
@@ -179,14 +180,14 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
             className="lg:w-60 p-4 lg:border-r border-slate-200/70"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.1, type: "spring", stiffness: 400 }}
           >
             <div className="hidden lg:block">
               <motion.h3 
                 className="font-medium text-slate-800 mb-3 flex items-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
+                transition={{ duration: 0.2, delay: 0.15 }}
               >
                 <Filter className="h-4 w-4 mr-2 text-sky-600" />
                 Filters
@@ -201,7 +202,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   className="space-y-2 glass-card p-3"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
+                  transition={{ duration: 0.2, delay: 0.2, type: "spring", stiffness: 400 }}
                   whileHover={{ y: -3, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                 >
                   <h4 className="text-sm text-slate-600 font-medium">Content Type</h4>
@@ -223,7 +224,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   className="space-y-2 glass-card p-3"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.5 }}
+                  transition={{ duration: 0.2, delay: 0.25, type: "spring", stiffness: 400 }}
                   whileHover={{ y: -3, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                 >
                   <h4 className="text-sm text-slate-600 font-medium">Human Confidence</h4>
@@ -247,6 +248,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
               className="lg:hidden flex items-center text-sm gap-2 glass rounded-lg p-2 w-full justify-center hover:shadow-md transition-shadow text-slate-700"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.1, type: "spring", stiffness: 500 }}
               aria-label="Show filters"
             >
               <SlidersHorizontal className="h-4 w-4" />
@@ -258,7 +260,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
             className="flex-1 px-4 py-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
           >
             <AnimatePresence mode="wait">
               {loading ? (
@@ -268,13 +270,14 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                   aria-live="polite"
                   aria-busy="true"
                 >
                   <motion.div 
                     className="rounded-full h-10 w-10 border-4 border-sky-200 border-b-sky-600"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
                   />
                   <span className="sr-only">Loading search results</span>
                 </motion.div>
@@ -284,20 +287,20 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.25, type: "spring", stiffness: 400 }}
                 >
                   <motion.div 
                     className="mb-6 flex items-center justify-between"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
+                    transition={{ duration: 0.2, delay: 0.1 }}
                   >
                     <div>
                       <motion.p 
                         className="text-sm text-slate-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
+                        transition={{ duration: 0.2, delay: 0.15, type: "spring", stiffness: 400 }}
                       >
                         About {results.length} results for{" "}
                         <motion.span 
@@ -312,14 +315,14 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                           }}
                           style={{ backgroundSize: "200% 200%" }}
                         >
-                          "{query}"
+                          &quot;{query}&quot;
                         </motion.span>
                       </motion.p>
                       <motion.p 
                         className="text-xs text-slate-500 mt-1"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
+                        transition={{ duration: 0.2, delay: 0.2 }}
                       >
                         Showing only content that appears to be non-AI generated
                       </motion.p>
@@ -337,7 +340,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                         key={result.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.2 + (index * 0.1) }}
+                        transition={{ duration: 0.2, delay: 0.1 + (index * 0.05), type: "spring", stiffness: 400 }}
                       >
                         <SearchResult
                           title={result.title}
@@ -354,18 +357,18 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                       className="mt-8 flex justify-center"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.6 }}
+                      transition={{ duration: 0.2, delay: 0.3, type: "spring", stiffness: 400 }}
                     >
                       <motion.nav 
                         className="inline-flex items-center gap-1 glass rounded-lg p-1 shadow-md" 
                         aria-label="Pagination"
                         whileHover={{ scale: 1.02 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 17, duration: 0.15 }}
                       >
                         <motion.span 
                           className="px-3 py-2 text-sm font-medium gradient-text bg-white/50 rounded-md shadow-sm"
                           whileHover={{ scale: 1.05 }}
-                          transition={{ type: "spring", stiffness: 400 }}
+                          transition={{ type: "spring", stiffness: 500, duration: 0.1 }}
                           aria-current="page"
                         >
                           1
@@ -377,7 +380,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                             className="px-3 py-2 text-sm text-slate-700 hover:bg-white/50 rounded-md transition-all hover:shadow-sm"
                             whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.5)" }}
                             whileTap={{ scale: 0.95 }}
-                            transition={{ type: "spring", stiffness: 400 }}
+                            transition={{ type: "spring", stiffness: 500, duration: 0.1 }}
                             aria-label={`Go to page ${page}`}
                           >
                             {page}
@@ -388,7 +391,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                           className="px-3 py-2 text-sm text-slate-700 hover:bg-white/50 rounded-md transition-all hover:shadow-sm flex items-center"
                           whileHover={{ scale: 1.05, x: 3, backgroundColor: "rgba(255, 255, 255, 0.5)" }}
                           whileTap={{ scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 400 }}
+                          transition={{ type: "spring", stiffness: 500, duration: 0.1 }}
                           aria-label="Go to next page"
                         >
                           Next <ArrowLeft className="h-4 w-4 ml-1 rotate-180" />
@@ -407,7 +410,7 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
         className="mt-auto py-4 glass border-t border-sky-100"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
       >
         <div className="container mx-auto px-4 text-center text-slate-600 text-sm">
           <p>© 2024 PureSearch - Finding authentic, non-AI generated content</p>
