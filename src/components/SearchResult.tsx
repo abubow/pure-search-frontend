@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExternalLink, UserCheck, Bot, HelpCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface SearchResultProps {
   title: string;
@@ -49,28 +50,51 @@ const SearchResult: React.FC<SearchResultProps> = ({
   const confidenceLevel = getConfidenceLevel();
 
   return (
-    <div className="glass-card mb-4 p-4 hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-r from-sky-100/10 to-cyan-100/10 z-0 opacity-50 group-hover:opacity-80 transition-opacity"></div>
+    <motion.div 
+      className="glass-card mb-4 p-4 transition-all duration-300 relative overflow-hidden group"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -3, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-r from-sky-100/10 to-cyan-100/10 z-0"
+        initial={{ opacity: 0 }}
+        whileHover={{ opacity: 0.8 }}
+        transition={{ duration: 0.3 }}
+      ></motion.div>
       <div className="flex items-start justify-between gap-4 relative z-10">
         <div className="flex-1 min-w-0">
-          <a
+          <motion.a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="group text-xl font-medium text-sky-600 hover:underline mb-1 block flex items-center gap-1"
+            whileHover={{ x: 3 }}
+            transition={{ type: "spring", stiffness: 400 }}
           >
             {title}
-            <ExternalLink size={16} className="inline opacity-0 group-hover:opacity-100 transition-opacity" />
-          </a>
+            <motion.div
+              initial={{ opacity: 0, x: -5 }}
+              whileHover={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ExternalLink size={16} className="inline" />
+            </motion.div>
+          </motion.a>
           <div className="text-emerald-600 text-sm mb-2 truncate">{displayUrl}</div>
           <p className="text-slate-700 line-clamp-2">{description}</p>
         </div>
-        <div className={`flex items-center whitespace-nowrap text-xs px-2.5 py-1.5 rounded-full ${confidenceLevel.color} shadow-sm`}>
+        <motion.div 
+          className={`flex items-center whitespace-nowrap text-xs px-2.5 py-1.5 rounded-full ${confidenceLevel.color} shadow-sm`}
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 400 }}
+        >
           {confidenceLevel.icon}
           {confidenceLevel.text}
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

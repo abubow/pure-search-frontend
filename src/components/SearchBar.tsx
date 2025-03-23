@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface SearchBarProps {
   initialQuery?: string;
@@ -25,18 +26,31 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <form 
+    <motion.form 
       onSubmit={handleSubmit} 
-      className={`w-full relative p-0.5 rounded-full shadow-lg ${compact ? 'max-w-4xl' : 'max-w-2xl'}`}
+      className={`w-full ${compact ? 'max-w-4xl' : 'max-w-2xl'}`}
+      initial={{ scale: 0.95 }}
+      animate={{ scale: 1 }}
+      transition={{ duration: 0.3 }}
     >
-      <div 
+      <motion.div 
         className={`relative w-full glass transition-all duration-300 ${
           isFocused 
             ? 'ring-2 ring-sky-500/70 shadow-lg' 
             : 'ring-1 ring-sky-200/50 shadow-md'
         } rounded-full overflow-hidden`}
+        whileHover={{ scale: 1.01 }}
+        animate={isFocused ? { scale: 1.01 } : { scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 15 }}
       >
-        <div className="absolute inset-0 search-bar-gradient opacity-60"></div>
+        <motion.div 
+          className="absolute inset-0 search-bar-gradient opacity-60"
+          animate={isFocused ? 
+            { opacity: 0.8 } : 
+            { opacity: 0.6 }
+          }
+          transition={{ duration: 0.3 }}
+        ></motion.div>
         <input
           type="text"
           value={searchQuery}
@@ -48,17 +62,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
             compact ? 'px-4 py-2 text-base' : 'px-5 py-4 text-lg'
           }`}
         />
-        <button
+        <motion.button
           type="submit"
-          className={`absolute right-2 top-1/2 transform -translate-y-1/2 gradient-primary text-white rounded-full transition-all hover:shadow-lg active:scale-95 ${
+          className={`absolute right-2 top-1/2 transform -translate-y-1/2 gradient-primary text-white rounded-full ${
             compact ? 'p-1.5' : 'p-2.5'
           }`}
           aria-label="Search"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
           <Search className={compact ? 'w-4 h-4' : 'w-5 h-5'} />
-        </button>
-      </div>
-    </form>
+        </motion.button>
+      </motion.div>
+    </motion.form>
   );
 };
 
