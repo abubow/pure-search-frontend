@@ -8,59 +8,7 @@ import SearchResult from './SearchResult';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Filter, Search, SlidersHorizontal } from 'lucide-react';
 import Script from 'next/script';
-
-// Mock search results data (in a real app, this would come from an API)
-const MOCK_RESULTS = [
-  {
-    id: '1',
-    title: 'The History of Classical Music - Authentic Analysis',
-    url: 'https://example.com/classical-music-history',
-    description: 'An in-depth exploration of classical music through the ages, with authentic analysis from leading music historians.',
-    confidence: 95,
-  },
-  {
-    id: '2',
-    title: 'Traditional Cooking Methods from Around the World',
-    url: 'https://example.com/traditional-cooking-methods',
-    description: 'Explore authentic cooking techniques passed down through generations across different cultures and regions.',
-    confidence: 88,
-  },
-  {
-    id: '3',
-    title: 'Personal Travel Journal: Exploring Remote Villages in Asia',
-    url: 'https://example.com/travel-asia-villages',
-    description: 'A personal account of travels through remote villages in Southeast Asia, with first-hand observations and cultural insights.',
-    confidence: 92,
-  },
-  {
-    id: '4',
-    title: 'Handcrafted Furniture: Techniques and Materials',
-    url: 'https://example.com/handcrafted-furniture',
-    description: 'Learn about traditional woodworking techniques and materials used in creating handcrafted furniture.',
-    confidence: 76,
-  },
-  {
-    id: '5',
-    title: 'Local Wildlife Conservation Efforts in the Amazon',
-    url: 'https://example.com/amazon-conservation',
-    description: 'Documenting local efforts to preserve biodiversity in the Amazon rainforest, with reports from field researchers.',
-    confidence: 85,
-  },
-  {
-    id: '6',
-    title: 'Historical Weather Patterns and Climate Change',
-    url: 'https://example.com/historical-weather-patterns',
-    description: 'Analysis of historical weather data and how it relates to current climate change patterns.',
-    confidence: 68,
-  },
-  {
-    id: '7',
-    title: 'Family Recipes: Mediterranean Cuisine',
-    url: 'https://example.com/mediterranean-family-recipes',
-    description: 'Collection of authentic family recipes from the Mediterranean region, passed down through generations.',
-    confidence: 93,
-  }
-];
+import useSearch, { SearchResult as SearchResultType } from '../hooks/useSearch';
 
 // Staggered animation variants for list items
 const listVariants = {
@@ -80,22 +28,17 @@ interface SearchPageProps {
 export function SearchPage({ initialQuery = '' }: SearchPageProps) {
   const searchParams = useSearchParams();
   const query = initialQuery || searchParams.get('q') || '';
-  const [results, setResults] = useState<typeof MOCK_RESULTS>([]);
-  const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const { search, isLoading, error, data } = useSearch();
 
   useEffect(() => {
     setMounted(true);
-    // Simulate API call with a short delay
-    setLoading(true);
-    const timer = setTimeout(() => {
-      // In a real app, this would be an API call with the query
-      setResults(MOCK_RESULTS);
-      setLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, [query]);
+    
+    if (query) {
+      // Perform search when query changes
+      search(query);
+    }
+  }, [query, search]);
 
   if (!mounted) return null;
 
@@ -111,13 +54,13 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
             "@type": "SearchResultsPage",
             "mainEntity": {
               "@type": "ItemList",
-              "itemListElement": results.map((result, index) => ({
+              "itemListElement": data?.results ? data.results.map((result, index) => ({
                 "@type": "ListItem",
                 "position": index + 1,
                 "url": result.url,
                 "name": result.title,
                 "description": result.description
-              }))
+              })) : []
             },
             "about": {
               "@type": "Thing",
@@ -248,174 +191,83 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
               className="lg:hidden flex items-center text-sm gap-2 glass rounded-lg p-2 w-full justify-center hover:shadow-md transition-shadow text-slate-700"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1, type: "spring", stiffness: 500 }}
-              aria-label="Show filters"
             >
               <SlidersHorizontal className="h-4 w-4" />
-              Show Filters
+              Filter Results
             </motion.button>
           </motion.aside>
-          
-          <motion.main 
-            className="flex-1 px-4 py-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
-            <AnimatePresence mode="wait">
-              {loading ? (
+
+          <main className="flex-grow p-4">
+            {query ? (
+              <>
                 <motion.div 
-                  key="loading"
-                  className="flex justify-center items-center py-20"
+                  className="mb-4 text-slate-600"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  aria-live="polite"
-                  aria-busy="true"
                 >
-                  <motion.div 
-                    className="rounded-full h-10 w-10 border-4 border-sky-200 border-b-sky-600"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                  />
-                  <span className="sr-only">Loading search results</span>
+                  Found {data?.total || 0} results for <span className="font-medium text-slate-800">&quot;{query}&quot;</span>
                 </motion.div>
-              ) : (
-                <motion.div
-                  key="results"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.25, type: "spring", stiffness: 400 }}
-                >
+
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <motion.div 
+                        key={i}
+                        className="bg-slate-100 rounded-lg h-32 animate-pulse"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: i * 0.05 }}
+                      />
+                    ))}
+                  </div>
+                ) : error ? (
                   <motion.div 
-                    className="mb-6 flex items-center justify-between"
+                    className="p-4 bg-red-50 text-red-600 rounded-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2, delay: 0.1 }}
                   >
-                    <div>
-                      <motion.p 
-                        className="text-sm text-slate-700"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2, delay: 0.15, type: "spring", stiffness: 400 }}
-                      >
-                        About {results.length} results for{" "}
-                        <motion.span 
-                          className="gradient-text font-medium"
-                          animate={{ 
-                            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
-                          }}
-                          transition={{ 
-                            duration: 5, 
-                            repeat: Infinity,
-                            ease: "linear"
-                          }}
-                          style={{ backgroundSize: "200% 200%" }}
-                        >
-                          &quot;{query}&quot;
-                        </motion.span>
-                      </motion.p>
-                      <motion.p 
-                        className="text-xs text-slate-500 mt-1"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2, delay: 0.2 }}
-                      >
-                        Showing only content that appears to be non-AI generated
-                      </motion.p>
-                    </div>
+                    Error loading search results: {error.message}
                   </motion.div>
-
-                  <motion.div 
-                    className="space-y-3"
+                ) : data?.results && data.results.length > 0 ? (
+                  <motion.div
+                    className="space-y-4"
                     variants={listVariants}
                     initial="hidden"
                     animate="visible"
                   >
-                    {results.map((result, index) => (
-                      <motion.div
-                        key={result.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2, delay: 0.1 + (index * 0.05), type: "spring", stiffness: 400 }}
-                      >
-                        <SearchResult
-                          title={result.title}
-                          url={result.url}
-                          description={result.description}
-                          confidence={result.confidence}
+                    <AnimatePresence>
+                      {data.results.map((result, i) => (
+                        <SearchResult 
+                          key={result.id} 
+                          result={result} 
+                          delay={i * 0.05} 
                         />
-                      </motion.div>
-                    ))}
+                      ))}
+                    </AnimatePresence>
                   </motion.div>
-
-                  {results.length > 0 && (
-                    <motion.div 
-                      className="mt-8 flex justify-center"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: 0.3, type: "spring", stiffness: 400 }}
-                    >
-                      <motion.nav 
-                        className="inline-flex items-center gap-1 glass rounded-lg p-1 shadow-md" 
-                        aria-label="Pagination"
-                        whileHover={{ scale: 1.02 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 17, duration: 0.15 }}
-                      >
-                        <motion.span 
-                          className="px-3 py-2 text-sm font-medium gradient-text bg-white/50 rounded-md shadow-sm"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ type: "spring", stiffness: 500, duration: 0.1 }}
-                          aria-current="page"
-                        >
-                          1
-                        </motion.span>
-                        {[2, 3, 4, 5].map(page => (
-                          <motion.a 
-                            key={page}
-                            href="#" 
-                            className="px-3 py-2 text-sm text-slate-700 hover:bg-white/50 rounded-md transition-all hover:shadow-sm"
-                            whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.5)" }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ type: "spring", stiffness: 500, duration: 0.1 }}
-                            aria-label={`Go to page ${page}`}
-                          >
-                            {page}
-                          </motion.a>
-                        ))}
-                        <motion.a 
-                          href="#" 
-                          className="px-3 py-2 text-sm text-slate-700 hover:bg-white/50 rounded-md transition-all hover:shadow-sm flex items-center"
-                          whileHover={{ scale: 1.05, x: 3, backgroundColor: "rgba(255, 255, 255, 0.5)" }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 500, duration: 0.1 }}
-                          aria-label="Go to next page"
-                        >
-                          Next <ArrowLeft className="h-4 w-4 ml-1 rotate-180" />
-                        </motion.a>
-                      </motion.nav>
-                    </motion.div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.main>
+                ) : (
+                  <motion.div 
+                    className="text-center py-12 text-slate-500"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    No results found for &quot;{query}&quot;
+                  </motion.div>
+                )}
+              </>
+            ) : (
+              <motion.div 
+                className="text-center py-12 text-slate-500"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                Enter a search query to find authentic, human-written content
+              </motion.div>
+            )}
+          </main>
         </div>
       </div>
-
-      <motion.footer 
-        className="mt-auto py-4 glass border-t border-sky-100"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-      >
-        <div className="container mx-auto px-4 text-center text-slate-600 text-sm">
-          <p>© 2024 PureSearch - Finding authentic, non-AI generated content</p>
-        </div>
-      </motion.footer>
     </div>
   );
 } 

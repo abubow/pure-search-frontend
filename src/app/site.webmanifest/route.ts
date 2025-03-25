@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://puresearch.example.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:3000';
 
 export async function GET() {
   return NextResponse.json(

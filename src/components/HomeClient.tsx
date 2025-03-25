@@ -1,9 +1,10 @@
 'use client';
 
 import SearchBar from "./SearchBar";
-import { Search, Sparkles, Shield } from "lucide-react";
+import { Search, Sparkles, Shield, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import Script from "next/script";
+import Link from "next/link";
 
 export default function HomeClient() {
   return (
@@ -17,12 +18,12 @@ export default function HomeClient() {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "PureSearch",
-            url: process.env.NEXT_PUBLIC_BASE_URL || "https://puresearch.example.com",
+            url: process.env.NEXT_PUBLIC_BASE_URL || "https://localhost:3000",
             potentialAction: {
               "@type": "SearchAction",
               target: {
                 "@type": "EntryPoint",
-                urlTemplate: (process.env.NEXT_PUBLIC_BASE_URL || "https://puresearch.example.com") + "/search?q={search_term_string}"
+                urlTemplate: (process.env.NEXT_PUBLIC_BASE_URL || "https://localhost:3000") + "/search?q={search_term_string}"
               },
               "query-input": "required name=search_term_string"
             },
@@ -32,7 +33,7 @@ export default function HomeClient() {
               name: "PureSearch",
               logo: {
                 "@type": "ImageObject",
-                url: (process.env.NEXT_PUBLIC_BASE_URL || "https://puresearch.example.com") + "/logo.png"
+                url: (process.env.NEXT_PUBLIC_BASE_URL || "https://localhost:3000") + "/logo.png"
               }
             }
           })
@@ -123,7 +124,7 @@ export default function HomeClient() {
           </motion.div>
           
           <motion.div 
-            className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-xl mx-auto"
+            className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.3 }}
@@ -147,6 +148,39 @@ export default function HomeClient() {
               delay={0.1}
             />
           </motion.div>
+          
+          <motion.div
+            className="mt-8 w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+          >
+            <motion.div
+              className="glass-card p-4 flex items-center justify-between"
+              whileHover={{ y: -3, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            >
+              <div>
+                <h3 className="font-medium text-slate-800 mb-1 flex items-center">
+                  <Globe className="h-4 w-4 mr-2 text-sky-500" />
+                  Submit Your Website
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Add your content to our search index
+                </p>
+              </div>
+              <Link href="/crawler">
+                <motion.button
+                  className="px-4 py-2 bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-md shadow-md"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                >
+                  Crawler
+                </motion.button>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
       </main>
 
@@ -156,6 +190,14 @@ export default function HomeClient() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.4 }}
       >
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <Link href="/crawler" className="text-sky-600 hover:text-sky-800 transition flex items-center text-sm">
+            <Globe className="h-3 w-3 mr-1" />
+            Submit a URL
+          </Link>
+          <span className="text-slate-300">|</span>
+          <Link href="/" className="text-sky-600 hover:text-sky-800 transition text-sm">Home</Link>
+        </div>
         <p className="text-slate-700 text-sm">© 2024 PureSearch - Find authentic content</p>
         <p className="mt-1 text-slate-500 text-sm">Helping you discover non-AI generated content</p>
       </motion.footer>

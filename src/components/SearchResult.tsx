@@ -1,20 +1,19 @@
 import React from 'react';
 import { ExternalLink, UserCheck, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { SearchResult as SearchResultType } from '../hooks/useSearch';
 
 interface SearchResultProps {
-  title: string;
-  url: string;
-  description: string;
-  confidence: number; // Confidence that the content is non-AI (0-100%)
+  result: SearchResultType;
+  delay?: number;
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
-  title,
-  url,
-  description,
-  confidence,
+  result,
+  delay = 0
 }) => {
+  const { title, url, description, confidence } = result;
+  
   // Format the URL for display (remove https://, truncate if too long)
   const displayUrl = url
     .replace(/^https?:\/\//i, '')
@@ -55,7 +54,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -3, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
-      transition={{ type: "spring", stiffness: 500, damping: 25, duration: 0.15 }}
+      transition={{ type: "spring", stiffness: 500, damping: 25, duration: 0.15, delay }}
     >
       <motion.div 
         className="absolute inset-0 bg-gradient-to-r from-sky-100/10 to-cyan-100/10 z-0"

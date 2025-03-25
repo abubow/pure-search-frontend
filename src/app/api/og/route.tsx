@@ -139,7 +139,7 @@ export async function GET(request: Request) {
               fontSize: '24px',
               color: '#64748b', // slate-500
             }}>
-              puresearch.example.com
+              localhost:3000
             </p>
           </div>
         </div>

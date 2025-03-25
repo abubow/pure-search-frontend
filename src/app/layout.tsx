@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://puresearch.example.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:3000';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
