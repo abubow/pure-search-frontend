@@ -26,7 +26,7 @@ export const searchContent = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&page=${page}&per_page=${perPage}`,
+      `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&page=${page}&per_page=${perPage}&refresh=true`,
       fetchOptions
     );
     

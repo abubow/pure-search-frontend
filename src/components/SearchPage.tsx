@@ -1,12 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import SearchBar from './SearchBar';
 import SearchResult from './SearchResult';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Filter, Search, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, Filter, Search, SlidersHorizontal, X } from 'lucide-react';
 import Script from 'next/script';
 import useSearch, { SearchResult as SearchResultType } from '../hooks/useSearch';
 
@@ -16,7 +16,7 @@ const listVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05 // Reduced from 0.1 for faster staggering
+      staggerChildren: 0.05
     }
   }
 };
@@ -25,25 +25,88 @@ interface SearchPageProps {
   initialQuery?: string;
 }
 
-export function SearchPage({ initialQuery = '' }: SearchPageProps) {
+interface FilterState {
+  contentTypes: {
+    articles: boolean;
+    blogs: boolean;
+    academic: boolean;
+  };
+  confidence: {
+    high: boolean;
+    medium: boolean;
+    low: boolean;
+  };
+}
+
+export default function SearchPage({ initialQuery }: SearchPageProps) {
   const searchParams = useSearchParams();
   const query = initialQuery || searchParams.get('q') || '';
-  const [mounted, setMounted] = useState(false);
-  const { search, isLoading, error, data } = useSearch();
+  const [selectedResultIndex, setSelectedResultIndex] = useState(-1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    contentTypes: {
+      articles: true,
+      blogs: true,
+      academic: true
+    },
+    confidence: {
+      high: true,
+      medium: true,
+      low: false
+    }
+  });
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const { data, isLoading, error } = useSearch(query);
+
+  // Filter results based on selected filters
+  const filteredResults = data?.results.filter(result => {
+    const confidenceLevel = result.confidence >= 90 ? 'high' : 
+                           result.confidence >= 70 ? 'medium' : 'low';
+    return filters.confidence[confidenceLevel];
+  }) || [];
 
   useEffect(() => {
-    setMounted(true);
-    
-    if (query) {
-      // Perform search when query changes
-      search(query);
-    }
-  }, [query, search]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!filteredResults.length) return;
 
-  if (!mounted) return null;
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedResultIndex(prev => 
+            prev < filteredResults.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedResultIndex(prev => 
+            prev > 0 ? prev - 1 : filteredResults.length - 1
+          );
+          break;
+        case 'Enter':
+          if (selectedResultIndex >= 0) {
+            window.open(filteredResults[selectedResultIndex].url, '_blank');
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [filteredResults, selectedResultIndex]);
+
+  const toggleFilter = (category: keyof FilterState, key: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [key]: !prev[category][key as keyof typeof prev[typeof category]]
+      }
+    }));
+  };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Add structured data for SearchResultsPage */}
       <Script
         id="schema-search"
@@ -120,23 +183,26 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
       <div className="container mx-auto">
         <div className="lg:flex">
           <motion.aside 
-            className="lg:w-60 p-4 lg:border-r border-slate-200/70"
+            className={`fixed inset-0 z-40 lg:relative lg:z-0 lg:w-60 lg:block ${
+              showFilters ? 'block' : 'hidden'
+            }`}
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.1, type: "spring", stiffness: 400 }}
           >
-            <div className="hidden lg:block">
-              <motion.h3 
-                className="font-medium text-slate-800 mb-3 flex items-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2, delay: 0.15 }}
-              >
-                <Filter className="h-4 w-4 mr-2 text-sky-600" />
-                Filters
-              </motion.h3>
+            <div className="h-full bg-white lg:bg-transparent p-4 lg:p-0">
+              <div className="flex items-center justify-between mb-4 lg:hidden">
+                <h3 className="font-medium text-slate-800">Filters</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 hover:bg-slate-100 rounded-full"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
               <motion.div 
-                className="space-y-3"
+                className="space-y-4"
                 variants={listVariants}
                 initial="hidden"
                 animate="visible"
@@ -149,18 +215,17 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   whileHover={{ y: -3, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                 >
                   <h4 className="text-sm text-slate-600 font-medium">Content Type</h4>
-                  <label className="flex items-center text-sm cursor-pointer text-slate-700">
-                    <input type="checkbox" className="mr-2 accent-sky-500" defaultChecked />
-                    <span>Articles</span>
-                  </label>
-                  <label className="flex items-center text-sm cursor-pointer text-slate-700">
-                    <input type="checkbox" className="mr-2 accent-sky-500" defaultChecked />
-                    <span>Blogs</span>
-                  </label>
-                  <label className="flex items-center text-sm cursor-pointer text-slate-700">
-                    <input type="checkbox" className="mr-2 accent-sky-500" defaultChecked />
-                    <span>Academic</span>
-                  </label>
+                  {Object.entries(filters.contentTypes).map(([key, value]) => (
+                    <label key={key} className="flex items-center text-sm cursor-pointer text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={value}
+                        onChange={() => toggleFilter('contentTypes', key)}
+                        className="mr-2 accent-sky-500"
+                      />
+                      <span className="capitalize">{key}</span>
+                    </label>
+                  ))}
                 </motion.div>
                 
                 <motion.div 
@@ -171,43 +236,44 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   whileHover={{ y: -3, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                 >
                   <h4 className="text-sm text-slate-600 font-medium">Human Confidence</h4>
-                  <label className="flex items-center text-sm cursor-pointer text-slate-700">
-                    <input type="checkbox" className="mr-2 accent-sky-500" defaultChecked />
-                    <span>High (90%+)</span>
-                  </label>
-                  <label className="flex items-center text-sm cursor-pointer text-slate-700">
-                    <input type="checkbox" className="mr-2 accent-sky-500" defaultChecked />
-                    <span>Medium (70%+)</span>
-                  </label>
-                  <label className="flex items-center text-sm cursor-pointer text-slate-700">
-                    <input type="checkbox" className="mr-2 accent-sky-500" />
-                    <span>Low (50%+)</span>
-                  </label>
+                  {Object.entries(filters.confidence).map(([key, value]) => (
+                    <label key={key} className="flex items-center text-sm cursor-pointer text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={value}
+                        onChange={() => toggleFilter('confidence', key)}
+                        className="mr-2 accent-sky-500"
+                      />
+                      <span className="capitalize">{key}</span>
+                    </label>
+                  ))}
                 </motion.div>
               </motion.div>
             </div>
-            
-            <motion.button 
-              className="lg:hidden flex items-center text-sm gap-2 glass rounded-lg p-2 w-full justify-center hover:shadow-md transition-shadow text-slate-700"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              Filter Results
-            </motion.button>
           </motion.aside>
 
           <main className="flex-grow p-4">
             {query ? (
               <>
-                <motion.div 
-                  className="mb-4 text-slate-600"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  Found {data?.total || 0} results for <span className="font-medium text-slate-800">&quot;{query}&quot;</span>
-                </motion.div>
+                <div className="flex items-center justify-between mb-4">
+                  <motion.div 
+                    className="text-slate-600"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    Found {filteredResults.length} results for <span className="font-medium text-slate-800">&quot;{query}&quot;</span>
+                  </motion.div>
+                  <motion.button 
+                    className="lg:hidden flex items-center text-sm gap-2 glass rounded-lg p-2 hover:shadow-md transition-shadow text-slate-700"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setShowFilters(true)}
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Filter Results
+                  </motion.button>
+                </div>
 
                 {isLoading ? (
                   <div className="space-y-4">
@@ -229,20 +295,30 @@ export function SearchPage({ initialQuery = '' }: SearchPageProps) {
                   >
                     Error loading search results: {error.message}
                   </motion.div>
-                ) : data?.results && data.results.length > 0 ? (
+                ) : filteredResults.length > 0 ? (
                   <motion.div
+                    ref={resultsRef}
                     className="space-y-4"
                     variants={listVariants}
                     initial="hidden"
                     animate="visible"
                   >
                     <AnimatePresence>
-                      {data.results.map((result, i) => (
-                        <SearchResult 
-                          key={result.id} 
-                          result={result} 
-                          delay={i * 0.05} 
-                        />
+                      {filteredResults.map((result, i) => (
+                        <motion.div
+                          key={result.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <SearchResult 
+                            result={result} 
+                            delay={i * 0.05}
+                            isSelected={i === selectedResultIndex}
+                            onSelect={() => setSelectedResultIndex(i)}
+                          />
+                        </motion.div>
                       ))}
                     </AnimatePresence>
                   </motion.div>
